@@ -16,12 +16,16 @@ const API_OPTIONS = {
 }
 
 const App = () => {
-	const [searchTerm, setSearchTerm] = useState('')
-	const [errorMessage, setErrorMessage] = useState('')
-	const [movieList, setMovieList] = useState([])
-	const [trendingMovies, setTrendingMovies] = useState([])
-	const [isLoading, setIsLoading] = useState(false)
 	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+	const [searchTerm, setSearchTerm] = useState('')
+
+	const [movieList, setMovieList] = useState([])
+	const [errorMessage, setErrorMessage] = useState('')
+	const [isLoading, setIsLoading] = useState(false)
+
+	const [trendingMovies, setTrendingMovies] = useState([])
+	//TODO: add state for error handling and loading for trending movies. 
+	// needs to be separate from all movies loading state
 
 	// Debounce search term input to avoid excessive API calls for 500ms
 	useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm])
