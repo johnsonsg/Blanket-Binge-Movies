@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDebounce } from 'react-use'
 import Search from './components/Search';
 import Spinner from './components/Spinner';
@@ -18,6 +18,8 @@ const API_OPTIONS = {
 const App = () => {
 	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
 	const [searchTerm, setSearchTerm] = useState('')
+	const [shouldScrollToResults, setShouldScrollToResults] = useState(false)
+	const allMoviesRef = useRef(null)
 
 	const [movieList, setMovieList] = useState([])
 	const [errorMessage, setErrorMessage] = useState('')
@@ -76,13 +78,26 @@ const App = () => {
 	}
 
 	useEffect(() => {
-		fetchMovies(debouncedSearchTerm)
+		const trimmed = debouncedSearchTerm.trim()
+		setShouldScrollToResults(Boolean(trimmed))
+		fetchMovies(trimmed)
 	}, [debouncedSearchTerm])
+
+	useEffect(() => {
+		if (!shouldScrollToResults || isLoading) return
+
+		requestAnimationFrame(() => {
+			allMoviesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+		})
+		setShouldScrollToResults(false)
+	}, [shouldScrollToResults, isLoading])
 
 	// keep in it's own useEffect to avoid re-fetching on every render
 	useEffect(() => {
 		fetchTrendingMovies()
 	}, []) // only call once on component mount
+
+	// useEffect that scrolls down to 
 
 	return (
 		<main>
@@ -95,7 +110,7 @@ const App = () => {
 						Without the Hassle
 					</h1>
 					<Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-				</header>x
+				</header>
 
 				{trendingMovies.length > 0 && (
 					<section className="trending">
@@ -106,15 +121,16 @@ const App = () => {
 								<li key={movie.$id}>
 									<p>{index + 1}</p>
 									<img src={movie.poster_url} alt={movie.title} />
-									<span>	{movie.title}</span>
+									<span> {movie.title}</span>
 								</li>
 							))}
 						</ul>
 					</section>
 				)}
-
-				<section className="all-movies">
-					<h2 className="mt-10">All Movies</h2>
+				<section ref={allMoviesRef} className="all-movies">
+					<h2 className="mt-10">
+						All Movies - <span className="text-light-200 font-medium text-2xl">{searchTerm}</span>
+					</h2>
 					{isLoading ? (
 						<Spinner />
 					) : errorMessage ? (
@@ -127,8 +143,6 @@ const App = () => {
 						</ul>
 					)}
 				</section>
-
-				<h1 className="text-white">{searchTerm}</h1>
 			</div>
 		</main>
 	)
