@@ -19,6 +19,7 @@ const App = () => {
 	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
 	const [searchTerm, setSearchTerm] = useState('')
 	const [shouldScrollToResults, setShouldScrollToResults] = useState(false)
+	const topRef = useRef(null)
 	const allMoviesRef = useRef(null)
 
 	const [movieList, setMovieList] = useState([])
@@ -97,12 +98,11 @@ const App = () => {
 		fetchTrendingMovies()
 	}, []) // only call once on component mount
 
-	// useEffect that scrolls down to 
-
 	return (
 		<main>
 			<div className="pattern" />
 			<div className="wrapper">
+				<div ref={topRef} />
 				<header>
 					<img src="./hero.png" alt="MovieFinder Logo" className="logo" />
 					<h1>
@@ -128,9 +128,22 @@ const App = () => {
 					</section>
 				)}
 				<section ref={allMoviesRef} className="all-movies">
-					<h2 className="mt-10">
-						All Movies - <span className="text-light-200 font-medium text-2xl">{searchTerm}</span>
-					</h2>
+					<div className="grid w-full gap-6 md:grid-cols-2 md:items-end">
+						<h2 className="mt-10">
+							All Movies
+							<span className="text-light-200 font-medium text-2xl">
+								{searchTerm}
+							</span>
+						</h2>
+						<button
+							type="button"
+							className="w-fit justify-self-start md:justify-self-end rounded-lg bg-light-100/10 px-3 py-2 text-xs font-medium text-white hover:bg-light-100/20"
+							onClick={() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+						>
+							Back to search
+						</button>
+					</div>
+
 					{isLoading ? (
 						<Spinner />
 					) : errorMessage ? (
